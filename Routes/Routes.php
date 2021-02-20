@@ -15,15 +15,20 @@ Route::set('about-us', function(){
 
 }); 
 
+Route::set('script.js', function(){
+	AboutUs::scriptFile();
+
+});
+
 Route::set('get-data', function(){
 	GetData::GetAllStaff();
 });
 
-Route::set('get-data-Range', function(){
+Route::set('get-data-range', function(){
 	GetData::GetStaffRange($_GET["Dep"],$_GET["S"],$_GET["E"]);
 });
 
-Route::set('get-data-Departments', function(){
+Route::set('get-data-departments', function(){
 	GetData::GetAllDepartments();
 });
 

@@ -38,9 +38,13 @@ class GetData
 			return;
 		}
 
-		if(count($PeopleInDepartment)-1 < $end or $start > $end){
+		if($start > $end){
 			echo 'End Out of Range';
 			return;
+		}
+
+		if(count($PeopleInDepartment)-1 < $end){
+			$end = count($PeopleInDepartment);
 		}
 
 		for ($i= $start; $i < $end ; $i++) { 

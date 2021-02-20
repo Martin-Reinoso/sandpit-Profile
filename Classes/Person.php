@@ -8,6 +8,7 @@ class Person {
 
   //Constructor
   function __construct($name, $email, $photo) {
+
     $this->name = $name; 
     $this->email = $email; 
     $this->photo = $photo; 
