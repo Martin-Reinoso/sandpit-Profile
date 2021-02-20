@@ -12,12 +12,14 @@ Route::set('update-data', function(){
 
 Route::set('about-us', function(){
 	AboutUs::CreateView('AboutUs');
-
 }); 
 
 Route::set('script.js', function(){
 	AboutUs::scriptFile();
+});
 
+Route::set('styles.css', function(){
+	AboutUs::cssFile();
 });
 
 Route::set('get-data', function(){
