@@ -19,4 +19,12 @@ Route::set('get-data', function(){
 	GetData::GetAllStaff();
 });
 
+Route::set('get-data-Range', function(){
+	GetData::GetStaffRange($_GET["Dep"],$_GET["S"],$_GET["E"]);
+});
+
+Route::set('get-data-Departments', function(){
+	GetData::GetAllDepartments();
+});
+
 ?>
