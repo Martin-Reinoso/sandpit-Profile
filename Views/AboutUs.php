@@ -23,9 +23,6 @@
     <title>Hello, world!</title>
   </head>
   <body>
-    
-    <div id="div1"><h2>Let jQuery AJAX Change This Text</h2></div>
-  	<button>Get External Content</button>
 
   	<section id= "team">
   		<div class="container my-3 py-5 text-center">
