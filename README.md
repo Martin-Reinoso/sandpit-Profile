@@ -72,13 +72,13 @@ An scroll animation is used to show the user that there are more cards in this D
 When the user scroll the initial 5 cards, more card are requested to the server. Every time the server returns 5 cards. An animation shows that more cards are available.
 
 <p align="center">
-  <img src="Images_Readme/02.gif"  width="500" >
+  <img src="Images_Readme/02.gif"  width="300" >
 </p>
 
 When the Click a Card it scrolls it.
 
 <p align="center">
-  <img src="Images_Readme/03.gif"  width="500" >
+  <img src="Images_Readme/03.gif"  width="700" >
 </p>
 
 
