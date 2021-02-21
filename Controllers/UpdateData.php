@@ -1,12 +1,18 @@
 <?php
 
+/**
+* @author Martin Reinoso
+* @date Jan 2021
+* @desc Controller to download profiles from https://randomuser.me/ and add to a Department.
+*/
+
 class UpdateData
 {
 	public static function Update($totalStaff){
 	
 		$TOTAL_NUMBER_OF_STAFF = $totalStaff;
 
-		$DEPARTAMENTS = array( 
+		$DEPARTAMENTS = array( //Descriptions and names of the Departmets in the company
 			new Department ("Hardware",
 				"Our engineers have created some tough acts to follow, and they continue to lead us to innovative breakthroughs. Because they’re driven not by what would be easy, but by what would be amazing."),
 			new Department ("Software and Services",
@@ -23,9 +29,10 @@ class UpdateData
 				"The team focused on delivering great customer experiences, you’ll introduce people to the Our products that help them do what they love in new ways.")
 		);
 
-		$curl = curl_init();
+		//Get staff profiles from https://randomuser.me
 
-		curl_setopt_array($curl, array(
+		$curl = curl_init();
+		curl_setopt_array($curl, array( 
 		  CURLOPT_URL => "https://randomuser.me/api/?results=".$TOTAL_NUMBER_OF_STAFF,
 		  CURLOPT_RETURNTRANSFER => true,
 		  CURLOPT_TIMEOUT => 30,
@@ -38,11 +45,13 @@ class UpdateData
 
 		$response = curl_exec($curl);
 		$err = curl_error($curl);
-
 		curl_close($curl);
 
 
 		$obj = json_decode($response, true);
+
+		//Add in random profiles to deiferent departments.
+		//I only keep the name, email and photo
 
 		foreach ($obj['results'] as $value) {
 		    $name = $value['name']['first'] . " " . $value['name']['last'];
@@ -54,12 +63,10 @@ class UpdateData
 			$DEPARTAMENTS[rand(0,count($DEPARTAMENTS)-1)]->add_person($person);
 		}
 
-		echo '<pre>'; print_r($DEPARTAMENTS); echo '</pre>';
+		echo '<pre>'; print_r($DEPARTAMENTS); echo '</pre>'; // Print the data file
 
 		$jsonData = serialize($DEPARTAMENTS);
-		 file_put_contents('./Model/data', $jsonData);
-
-
+		 file_put_contents('./Model/data', $jsonData); //Store informaiton in a file on the server
 		}
 
 }

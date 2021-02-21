@@ -1,23 +1,19 @@
 <?php
 
+/**
+* @author Martin Reinoso
+* @date Jan 2021
+* @desc Controller that manage the data in hte server
+* returns a JSON file with what was requested
+*/
+
 class GetData
 {
-	public static function GetAllStaff(){
-
-		$data = file_get_contents('./Model/data');
-		$dataArray = unserialize($data);
-		$JsonReturn = array();
-
-		foreach ($dataArray as $Department) {
-			foreach ($Department->people as $person) {
-				array_push($JsonReturn, $person);
-			}
-		}
-		header('Content-Type: application/json');
-		echo json_encode($JsonReturn);
-	}
-
 	public static function GetStaffRange($DepartmentID, $start, $end ){
+
+		//Return a JSON with profiles of Stuff in the selected Deparment 
+		//Start is the id of the first one to return
+		//End is the id of the last profile to return
 
 		$JsonReturn = array();
 
@@ -44,7 +40,7 @@ class GetData
 		}
 
 		if(count($PeopleInDepartment)-1 < $end){
-			$end = count($PeopleInDepartment);
+			$end = count($PeopleInDepartment); // return until the last profile in the data
 		}
 
 		for ($i= $start; $i < $end ; $i++) { 
@@ -56,6 +52,8 @@ class GetData
 	}
 
 	public static function GetAllDepartments(){
+
+		// Return All Department names and Descriptions with not staff profiles 
 
 		$JsonReturn = array();
 

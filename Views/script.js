@@ -1,3 +1,16 @@
+/**
+* @author Martin Reinoso
+* @date Jan 2021
+* @desc Scripts that loads with Ajax and animate the interaction
+*  
+**/
+
+//Variables
+
+var localData = []; //Store the current number of ContactCards with id of the department
+var notVisiblePersonCardHolder = [] // Store the object that can be scrolled but have nto been seen on the screen
+
+// Templates for the Department and profile (ContactCard)
 
 const DepartmentCard = ({ id,name, description }) => `
   <div class="row mb-5" id="Department${id}" >
@@ -12,7 +25,6 @@ const DepartmentCard = ({ id,name, description }) => `
 `;
 
 
-
 const ContactCard = ({ name, email, photo, id }) => `
   <div class="col-lg-3 col-md-6" id="Person${id}" onclick="ClickScroll(Person${id})">
     <div class="card" >
@@ -25,10 +37,74 @@ const ContactCard = ({ name, email, photo, id }) => `
   </div>
 `;
 
+$(document).ready(function(){
+  // Runs after the page is load.
+  // Uses Ajax to get a JSON file with the depsrtaments names and descriptions
+  getDepartmentsAjax();
+});
+
+function getDepartmentsAjax(){
+  // Get the Department information from the server and display in HTML
+
+  data_url = getBaseURL()+"/get-data-departments";
+  
+  $.getJSON( data_url, function( data ) { // Gets the information of all departments (name, description)
+    
+    data.map((item, id) => Object.assign(item, { id })) // Add an Id to each Department
+
+    $('#holdDepartment').append(data.map(DepartmentCard)); // Usin Templates for DepartmentCards
+
+    for (i = 0; i < data.length; i++) {
+
+
+      localData.push(0); 
+      notVisiblePersonCardHolder.push(i);
+
+      getPersonCardAjax(i);
+
+    }
+
+    CheckVIsibleToAnimate();
+
+  });
+}
+
+function getPersonCardAjax(dep){
+
+  // Get from server the next 5 ContactCards and add them to the HTML
+
+  var NUM_LOAD_CARDS = 5; //Min 5 becuase a scroll is needed to load more cards
+  var currentLastId = localData[dep];
+
+    data_url = getBaseURL()+"/get-data-range?Dep="+dep+"&S="+currentLastId+"&E="+(currentLastId+NUM_LOAD_CARDS);  
+    
+    $.getJSON( data_url, function( data ) {
+      localData[dep] = localData[dep]+(data.length);
+
+      for (i = 0; i < data.length; i++) {
+        data[i].id = dep+"_"+(currentLastId+i); //Adds an ID to the object
+      }
+
+      $('#DepartmentCards'+dep).append(data.map(ContactCard)); // Adds the template
+
+      if (currentLastId != 0){
+
+        //Animation to show there are more cards
+        //After adding the new downloaded cards scroll to show the border
+
+        var currentScroll = $('#DepartmentCards'+dep).scrollLeft();
+        var extraScroll = 30;
+        $('#DepartmentCards'+dep).animate({scrollLeft: currentScroll + extraScroll}, 750);
+      }
+
+  });
+}
+
 
 function ClickScroll( CardId){
-  console.log($(CardId).position());
-  console.log($(CardId).position().left);
+
+  // When a contactCard is click, move the scroller to center that card on the screen
+
   var currentScroll= $(CardId).parent().scrollLeft();
   var scrollerWidth = $(CardId).parent().outerWidth();
   var positionLeftCard = $(CardId).position().left
@@ -43,87 +119,51 @@ function ClickScroll( CardId){
     moveVal = -1* (centeredCard - positionLeftCard);
   }
 
-  console.log(moveVal);
-
   $(CardId).parent().animate({scrollLeft: currentScroll + moveVal}, 750);
-  //return;
-}
-
-
-
-function getBaseURL(){
-	var data_url = document.location.href.split('/');
-    data_url.pop();
-    return data_url.join('/');
-}
-
-
-var localData = [];
-
-function getPersonCardAjax(dep){
-
-  var NUM_LOAD_CARDS = 5; //Min 5 becuase a scroll is needed to load more cards
-  var currentLastId = localData[dep];
-
-  	data_url = getBaseURL()+"/get-data-range?Dep="+dep+"&S="+currentLastId+"&E="+(currentLastId+NUM_LOAD_CARDS);	
-  	
-    $.getJSON( data_url, function( data ) {
-      localData[dep] = localData[dep]+(data.length);
-
-  		for (i = 0; i < data.length; i++) {
-  			data[i].id = dep+"_"+(currentLastId+i);
-		  }
-
-  		$('#DepartmentCards'+dep).append(data.map(ContactCard));
-
-      if (currentLastId != 0){
-        var currentScroll = $('#DepartmentCards'+dep).scrollLeft();
-        var extraScroll = 30;
-        $('#DepartmentCards'+dep).animate({scrollLeft: currentScroll + extraScroll}, 750);
-      }
-
-	});
-}
-
-function getDepartmentsAjax(){
-  data_url = getBaseURL()+"/get-data-departments";
-  $.getJSON( data_url, function( data ) {
-
-    data.map((item, id) => Object.assign(item, { id })) // Add an Id to each Department
-
-    $('#holdDepartment').append(data.map(DepartmentCard));
-
-    for (i = 0; i < data.length; i++) {
-      localData.push(0);
-      notVisiblePersonCardHolder.push(i);
-      getPersonCardAjax(i);
-    }
-    CheckVIsibleToAnimate();
-  });
 }
 
 
 function scrollCards( DepartmentId){
-  
+  //Function thet rin when scrolling the contact Cards
+  //When detect a limit ask form more cards to the server
+
   var scrollDepartment = "#DepartmentCards"+DepartmentId;
 
   var currentScroll= $(scrollDepartment).scrollLeft();
   var maxScroll = $(scrollDepartment)[0].scrollWidth - $(scrollDepartment).outerWidth();
 
   if(currentScroll == maxScroll ){
-    getPersonCardAjax(DepartmentId);
-    //$(scrollDepartment).scrollLeft(currentScroll-1);
+    getPersonCardAjax(DepartmentId); //On the scroll limit request for more cards from this Department
   }
 }
 
 
+function CheckVIsibleToAnimate(){
+  // look for the scroll area and wait until is on the screen to move it
 
-$(document).ready(function(){
-  getDepartmentsAjax();
+  if (notVisiblePersonCardHolder.length !=0 && $('#DepartmentCards'+notVisiblePersonCardHolder[0]).visible(true)) {
+      var currentScroll = $('#DepartmentCards'+notVisiblePersonCardHolder[0]).scrollLeft();
+      var extraScroll = 30;
+      $('#DepartmentCards'+notVisiblePersonCardHolder[0]).animate({scrollLeft: currentScroll + extraScroll}, 750);
+      notVisiblePersonCardHolder.splice(0,1);
+  } 
+}
+
+
+$(window).scroll(function(event) {
+  // Check if there is a vertical scroll and animate ContactCards if the are new 
+  CheckVIsibleToAnimate();
 });
 
 
 
+//HELPER FUNCTIONS
+
+function getBaseURL(){
+  var data_url = document.location.href.split('/');
+    data_url.pop();
+    return data_url.join('/');
+}
 
 
 (function($) {
@@ -155,20 +195,3 @@ $(document).ready(function(){
   };
     
 })(jQuery);
-
-var win = $(window);
-
-var notVisiblePersonCardHolder = []
-
-function CheckVIsibleToAnimate(){
-  if (notVisiblePersonCardHolder.length !=0 && $('#DepartmentCards'+notVisiblePersonCardHolder[0]).visible(true)) {
-      var currentScroll = $('#DepartmentCards'+notVisiblePersonCardHolder[0]).scrollLeft();
-      var extraScroll = 30;
-      $('#DepartmentCards'+notVisiblePersonCardHolder[0]).animate({scrollLeft: currentScroll + extraScroll}, 750);
-      notVisiblePersonCardHolder.splice(0,1);
-  } 
-}
-
-win.scroll(function(event) {
-  CheckVIsibleToAnimate();
-});

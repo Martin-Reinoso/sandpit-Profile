@@ -1,6 +1,12 @@
 <?php
-require_once('Routes/Routes.php');
 
+/**
+* @author Martin Reinoso
+* @date Jan 2021
+* @desc Automatic load of all classess and Routes
+*/
+
+require_once('Routes/Routes.php');
 
 function __autoload($class_name){
 
